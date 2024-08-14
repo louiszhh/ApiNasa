@@ -1,10 +1,10 @@
 import React from 'react';
-import AsteroidsFeed from './AsteroidsFeed';
+import API from './API';
 
 function App() {
   return (
     <div className="App">
-      <AsteroidsFeed />
+      <API />
     </div>
   );
 }
