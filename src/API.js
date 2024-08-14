@@ -2,74 +2,59 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const AsteroidsFeed = () => {
-  const [asteroids, setAsteroids] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+const API = () => {
+  const [dadosApod, setDadosApod] = useState(null);
+  const [erro, setErro] = useState(null);
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    const fetchAsteroids = async () => {
+    const buscarDadosApod = async () => {
       try {
-        const response = await axios.get(
-          `https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-08-01&end_date=2024-08-08&api_key=jNM4u5U4iZtq480iAnbpxMrX14eJq1mdjSNgKDBT`
+        const resposta = await axios.get(
+          `https://api.nasa.gov/planetary/apod?api_key=jNM4u5U4iZtq480iAnbpxMrX14eJq1mdjSNgKDBT`
         );
-        if (response.status === 200) {
-          setAsteroids(response.data);
+        if (resposta.status === 200) {
+          setDadosApod(resposta.data);
         } else {
-          setError(`Erro na resposta da API: ${response.status}`);
+          setErro(`Erro na resposta da API: ${resposta.status}`);
         }
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
-        setError('Erro ao buscar dados. Verifique a chave da API ou sua conexão.');
+        setErro('Erro ao buscar dados. Verifique a chave da API ou sua conexão.');
       } finally {
-        setLoading(false);
+        setCarregando(false);
       }
     };
 
-    fetchAsteroids();
+    buscarDadosApod();
   }, []);
 
-  const formatNumber = (number) => {
-    return typeof number === 'number' ? number.toFixed(2) : 'N/A';
-  };
-
-  if (loading) return <p className="loading">Carregando...</p>;
-  if (error) return <p className="error">{error}</p>;
+  if (carregando) return <p className="carregando">Carregando...</p>;
+  if (erro) return <p className="erro">{erro}</p>;
 
   return (
-    <div className="container-asteroids">
-      <h1 className="titulo-asteroids">Dados Asteroides</h1>
-    
-      <div className="container-asteroids-list">
-        {asteroids && asteroids.near_earth_objects ? (
-          Object.keys(asteroids.near_earth_objects).map(date => (
-            <div key={date} className="data-group">
-              <h2 className="data-date">{date}</h2>
-              {asteroids.near_earth_objects[date].map(asteroid => (
-                <div key={asteroid.id} className="cartao-asteroid">
-                  <h3 className="titulo-asteroid">{asteroid.name}</h3>
-                  <p className="descricao-asteroid">
-                    <strong>Diâmetro (m): </strong>
-                    {formatNumber(asteroid.estimated_diameter.meters.estimated_diameter_max)}
-                  </p>
-                  <p className="descricao-asteroid">
-                    <strong>Velocidade (km/h): </strong>
-                    {formatNumber(parseFloat(asteroid.close_approach_data[0].relative_velocity.kilometers_per_hour))}
-                  </p>
-                  <p className="descricao-asteroid">
-                    <strong>Distância mínima (km): </strong>
-                    {formatNumber(parseFloat(asteroid.close_approach_data[0].miss_distance.kilometers))}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ))
-        ) : (
-          <p className="sem-asteroids">Nenhum dado disponível no momento.</p>
-        )}
-      </div>
+    <div className="container-apod">
+      <h1 className="titulo-apod">Imagem do Dia da Astronomia</h1>
+      {dadosApod && (
+        <div className="conteudo-apod">
+          <h2 className="titulo-apod-conteudo">{dadosApod.title}</h2>
+          <p className="data-apod">{dadosApod.date}</p>
+          {dadosApod.media_type === 'image' ? (
+            <img src={dadosApod.url} alt={dadosApod.title} className="imagem-apod" />
+          ) : (
+            <iframe
+              title={dadosApod.title}
+              src={dadosApod.url}
+              frameBorder="0"
+              allowFullScreen
+              className="video-apod"
+            />
+          )}
+          <p className="descricao-apod">{dadosApod.explanation}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AsteroidsFeed;
+export default API;
